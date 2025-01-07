@@ -1,4 +1,5 @@
 import { registerRootComponent } from 'expo';
+import { Icon } from '@gluestack-ui/icon';
 
 import App from './App';
 
