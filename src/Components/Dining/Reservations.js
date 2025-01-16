@@ -16,13 +16,13 @@ const DiningFooter = () => {
   );
 };
 
-const Reservations = () => {
+const Reservations = ({navigation}) => {
   const [reservations, setReservations] = useState([]);
   const [partySize, setPartySize] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Start with current date
+  const [selectedDate, setSelectedDate] = useState(new Date()); 
   const [selectedPartySize, setSelectedPartySize] = useState('');
   const [daysInAdvance, setDaysInAdvance] = useState('');
   const [maxDaysInAdvance, setMaxDaysInAdvance] = useState('');
@@ -30,7 +30,7 @@ const Reservations = () => {
   const [dayOfMonth, setdayOfMonth] = useState('');
   const [timeInterval, setTimeInterval] = useState('');
   const [defaultTime, setDefaultTime] = useState('');
-  
+  // const [defaultTime, setDefaultTime] = useState('');
   const formatDate = (date) => {
     const minDays = parseInt(daysInAdvance, 10) || 0;
     const adjustedDay = date.getDate() + minDays + 1;
@@ -145,9 +145,47 @@ const Reservations = () => {
 
 
 
-  const renderItem1 = ({ item }) => {
-    return <Text style={styles.timeSlot}>{item.TimeSlot}</Text>;
+  // const renderItem1 = ({ item }) => {
+  //   return (
+  //     <TouchableOpacity
+  //       onPress={() => handleResTime(item)}
+  //     >
+  //       <Text style={styles.timeSlot}>{item.TimeSlot}</Text>
+  //     </TouchableOpacity>
+  //   );
+  // };
+
+  const renderItem1 = (item, restaurantName) => {
+    return (
+      <TouchableOpacity
+        onPress={() => handleResTime(item, restaurantName)}
+      >
+        <Text style={styles.timeSlot}>{item.TimeSlot}</Text>
+      </TouchableOpacity>
+    );
   };
+  
+  
+
+  // const renderItem = ({ item }) => {
+  //   return (
+  //     <View style={styles.itemContainer}>
+  //       <Text style={styles.itemText}>
+  //         {item.RestaurantName || 'Unnamed Restaurant'}
+  //       </Text>
+  //       <Text style={styles.timings}>
+  //         {item.Timings[0].StartTime || 'Null'} to {item.Timings[0].EndTime || 'Null'}
+  //       </Text>
+  //       <FlatList
+  //         data={item.TimeSlots}
+  //         keyExtractor={(slot, index) => slot.MenuID || `fallback-${index}`}
+  //         renderItem={renderItem1}
+  //         horizontal={true}
+  //         showsHorizontalScrollIndicator={false}
+  //       />
+  //     </View>
+  //   );
+  // };
 
   const renderItem = ({ item }) => {
     return (
@@ -161,13 +199,14 @@ const Reservations = () => {
         <FlatList
           data={item.TimeSlots}
           keyExtractor={(slot, index) => slot.MenuID || `fallback-${index}`}
-          renderItem={renderItem1}
+          renderItem={({ item: slotItem }) => renderItem1(slotItem, item.RestaurantName)}
           horizontal={true}
           showsHorizontalScrollIndicator={false}
         />
       </View>
     );
   };
+  
 
   const handleDemoPress = () => {
     setModalVisible(true);
@@ -183,7 +222,17 @@ const Reservations = () => {
     // console.log('Updated party size:', item); 
   };
 
-
+  const handleResTime = (item, restaurantName) => {
+    navigation.navigate('DiningRestaurant', {
+      formatDate1: formatDate(selectedDate),
+      clickedItem: item,
+      partysize: selectedPartySize,
+      restaurantName: restaurantName, // Pass the restaurant name here
+    });
+  };
+  
+  
+  
 
   const handleDone = () => {
     setModalVisible(false)
@@ -248,13 +297,15 @@ const initialMinutes = date.getMinutes();
 const partymems= Array.from({ length: 12 }, (_, i) => i +1);
 
 const time =() =>{
-  if(selectedTime){
+
+   if(selectedTime){
     return selectedTime
   }
   else{
     return defaultTime
   }
 }
+ 
   const options = { weekday: 'short' };
   return (
     <View style={styles.container}>
@@ -270,13 +321,13 @@ const time =() =>{
         <FlatList
           contentContainerStyle={styles.content}
           data={[1, 1, 1, 1]}
-          renderItem={({ item, index }) => {
+          renderItem={({ item, index }) => { 
             return (
               <View style={{ marginBottom: 15 }}>
                 {index == 0 && <View style={styles.resTop}>
                   <TouchableOpacity onPress={handleDemoPress}>
                     {/* <Text style={styles.demoText}> {selectedPartySize} * {selectedTime} {''} {dayOfMonth}</Text> */}
-                    <Text style={styles.demoText}> {selectedPartySize} * {time} {''} {dayOfMonth}</Text>
+                    <Text style={styles.demoText}> {selectedPartySize} * {time()} {''} {dayOfMonth}</Text>
                   </TouchableOpacity>
                 </View>}
 
@@ -292,7 +343,9 @@ const time =() =>{
                       }}
                     >
                       Selected Date, {selectedDate.toLocaleString('default', { month: 'short' })}{' '}
-                      {updatedDay} | PartySize {selectedPartySize} 
+                      {updatedDay} | PartySize {selectedPartySize} | <Text style={styles.text} numberOfLines={1} ellipsizeMode="tail">
+        Any Restaurent
+      </Text>
                     </Text>
                     <Text>To Reserve Restaurants & Times</Text>
                   </View>
@@ -428,6 +481,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     opacity: 0.3
 
+  },
+  text: {
+   
+    width: 50, // Set the width of the container
+    
+    color: '#555b59',
+    fontSize: 18,
+    fontWeight: '500',
   },
   itemText: {
     fontSize: 18,
